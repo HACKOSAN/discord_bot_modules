@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Bashfuck parts: https://github.com/0xddaa/bashfuck
+
+set -e
+
+join_by() {
+    local IFS="$1"
+    shift
+    echo "$*"
+}
+
+n=()
+n[0]='$#'
+n[1]='${##}'
+n[2]="\$((${n[1]}<<${n[1]}))"
+n[3]="\$((${n[2]}#${n[1]}${n[1]}))"
+n[4]="\$((${n[1]}<<${n[2]}))"
+n[5]="\$((${n[2]}#${n[1]}${n[0]}${n[1]}))"
+n[6]="\$((${n[2]}#${n[1]}${n[1]}${n[0]}))"
+n[7]="\$((${n[2]}#${n[1]}${n[1]}${n[1]}))"
+
+str_to_oct() {
+    s="\$\\'"
+
+    for ((i = 0; i < ${#1}; i++)); do
+        char="${1:i:1}"
+        oct=$(printf "%03o" \'"${char}")
+
+        e='\\'
+        for ((j = 0; j < ${#oct}; j++)); do
+            e+="${n[${oct:j:1}]}"
+        done
+        s+="${e}"
+    done
+
+    s+="\\'"
+
+    echo "${s}"
+}
+
+arg_to_cmd() {
+    for str in "$@"; do
+        OCTAL_STRING_ARR+=($(str_to_oct "${str}"))
+    done
+
+    echo "{$(join_by , "${OCTAL_STRING_ARR[@]}")}"
+}
+
+bashfuck_encode() {
+    ARG=('bash' '-c' "$1")
+    ENCODED_CMD=$(arg_to_cmd "${ARG[@]}")
+
+    PAYLOAD="\${!#}<<<${ENCODED_CMD}"
+    echo "${PAYLOAD}"
+}
+
+compress() { xz -9eT0; }
+
+main() {
+    password="$(head -c "$((RANDOM % 32 + 4))" /dev/urandom | compress | base64 -w 0 | fold -w1 | shuf | tr -d '\n')"
+
+    data="$(bashfuck_encode "$*" | compress |
+        openssl enc -aes-256-cbc -md sha512 -a -pbkdf2 -iter 100000 -salt -pass pass:"$password" |
+        compress |
+        base64 -w 0)"
+
+    datae="$(echo "echo \"$data\"|base64 -d|xz -d|openssl enc -aes-256-cbc -md sha512 -a -d -pbkdf2 -iter 100000 -salt -pass pass:'$password'|xz -d|bash" | compress | base64 -w 0)"
+
+    cat <<EOF
+u=a;us=\${u}s;w=z;u=${datae:${#datae}/2};a=a;r=\$o;y=d;o=\$'\\x20';f=\$'\\x2d';p=x;n=b;q=${datae:0:${#datae}/2};e=c;j=h;rs=tr;r=o;l=e;\$l\$e\$j\$r\$o\$q\$u|\${n}\${a}s\$l\$((((RANDOM-$RANDOM-$RANDOM-$RANDOM&0)+1+3-2+1-4+43-2)*2-16))\$o\$f\$y|\$p\$w\$o\$f\$y|b\$us\$j;\$o\$rs\${m}u\$l\$o-rf\$o/\$w
+EOF
+}
+
+main "$@"

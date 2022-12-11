@@ -1,0 +1,11 @@
+{
+    "prefix": "'",
+    "note-prefix": "\"",
+    "hello-message": "",
+    "bye-message": "Goodbye world",
+    "cache-sz": 500,
+    "logging": false,
+    "sh-timeout": 10,
+    "chunk-limit": 4,
+    "playing": "with your step-mother"
+}

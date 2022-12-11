@@ -1,0 +1,6 @@
+discord.py
+sqlalchemy
+sqlalchemy-utils
+flask
+psutil
+distro
