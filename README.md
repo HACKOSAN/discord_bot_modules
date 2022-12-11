@@ -21,8 +21,8 @@ vim config.json
 python3 src/main.py
 ```
 # Requirements
-> make sure you have the needed requirements
-> check **requirements.txt** for more information
+- make sure you have the needed requirements
+- check **requirements.txt** for more information
 
 
 # How to make a discord bot account and get its token
