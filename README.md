@@ -1,6 +1,5 @@
-# GiveIdeas bot
+# *Give Ideas* bot
 
-## Don't ask about the name pls kthx
 
 > The official bot for \*nix notes discord server
 
@@ -8,11 +7,17 @@
 
 ```sh
 python3 -m pip install --user -r requirements.txt  # or preferable make a venv
+
 cp .env.example .env
+
 vim .env
+
 python3 src/main.py
+
 vim config.json
+
 . .env
+
 python3 src/main.py
 ```
 
